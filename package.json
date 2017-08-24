@@ -1,5 +1,8 @@
 {
   "name": "LIRI-Node-App",
-  "version": "0.0.1"
-  
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "^3.2.1",
+    "node-spotify-api": "^1.0.7"
+  }
 }
