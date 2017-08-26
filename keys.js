@@ -22,3 +22,4 @@ var Spotify = require('node-spotify-api');
 
 exports.spotify = new Spotify({id: "ac6b318d9110461697035255cc1025ca",
     secret: "b6f319dfd30f4f418e5501ce4d902b27"});
+

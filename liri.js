@@ -12,7 +12,13 @@ var spotify = keys.spotify;
 
 
 //require request package for OMDb scraping
-var request = require("request");
+var request = require('request');
+
+request('http://www.omdbapi.com/?apikey=40e9cece', function (error, response, body) {
+    console.log('error:', error); // Print the error if one occurred
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the HTML for the Google homepage.
+});
 
 
 //require file structure package
@@ -21,6 +27,11 @@ var fs = require("fs");
 
 //Stores command line command in command var
 var command = process.argv[2];
+var searchTerm = process.argv[3];
+
+function isEmpty(val){
+    return (val === undefined || val == null || val.length <= 0);
+}
 
 function userInput() {
 
@@ -29,11 +40,19 @@ function userInput() {
         console.log("Donald Trump's most recent tweet:\n");
 
 
-        twitter.get('users/show', {screen_name: 'realDonaldTrump'}, function (error, data, response) {
+        twitter.get('statuses/user_timeline', {screen_name: 'realDonaldTrump', count: 20}, function (error, data, response) {
 
-            var tweets = data.status.text;
+            var tweets = data;
 
-            console.log(tweets);
+            if (error) {
+                console.log(error.message);
+            }
+
+            for (var i = 0; i < tweets.length; i++) {
+
+                console.log(tweets[i].text + "\n");
+
+            }
 
         });
 
@@ -44,7 +63,7 @@ function userInput() {
 
         console.log("My 20 most recent tweets:");
 
-        twitter.get('statuses/home_timeline', {count: 20}, function (error, data, response) {
+        twitter.get('statuses/user_timeline',{screen_name: 'alrod909', count: 20}, function (error, data, response) {
 
             var tweets = data;
 
@@ -60,14 +79,9 @@ function userInput() {
         });
     }
 
-    else if (command === "spotify-this-song") {
+    else if (command === "spotify-this-searchTerm") {
 
-        console.log("Song Info:");
-
-
-        var song = process.argv[3];
-
-        if (song.isEmptyObject()) {
+        if (isEmpty(searchTerm)) {
 
             spotify.search({type: 'track', query: "The Sign"}, function (err, data) {
 
@@ -94,7 +108,7 @@ function userInput() {
 
         else {
 
-            spotify.search({type: 'track', query: song}, function (err, data) {
+            spotify.search({type: 'track', query: searchTerm}, function (err, data) {
 
 
                 if (err) {
@@ -122,23 +136,39 @@ function userInput() {
     }
 
     else if (command === "movie-this") {
+
         console.log("Movie Info:");
+
+        searchTerm = searchTerm.split("").join("+");
+
+        request.get('http://www.omdbapi.com/?t=' + searchTerm)
+            .on('error', function(err) {
+                console.log(err)
+            })
     }
 
     else if (command === "do-what-it-says") {
         var randText;
-        fs.readFile('./random.txt', function (err, data) {
+        fs.readFile('./random.txt', "UTF8", function (err, data) {
+
             if (err) throw err;
+
             console.log(data);
-            randText = JSON.stringify(data);
-            console.log("The command from random.txt was: " + randText);
+
+            randText = data.split(",");
+
+            command = randText[0];
+            searchTerm = randText[1];
+
+            userInput();
+
         });
     }
 
     else {
         console.log("The command you entered was not understood. Please Enter one of the following commands:");
         console.log("--> my-tweets : Displays the last 20 tweets you have posted");
-        console.log("--> spotify-this-song 'song title' : Displays Spotify info on the entered song");
+        console.log("--> spotify-this-searchTerm 'searchTerm title' : Displays Spotify info on the entered searchTerm");
         console.log("--> movie-this 'movie title' : Displays IMDb info on selected movie. If no title is entered, defaults to Mr. Nobody");
         console.log("--> do-what-it-says : Uses the contents of random.txt as the inputted command");
     }
