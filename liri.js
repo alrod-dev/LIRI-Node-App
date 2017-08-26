@@ -14,13 +14,6 @@ var spotify = keys.spotify;
 //require request package for OMDb scraping
 var request = require('request');
 
-request('http://www.omdbapi.com/?apikey=40e9cece', function (error, response, body) {
-    console.log('error:', error); // Print the error if one occurred
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    console.log('body:', body); // Print the HTML for the Google homepage.
-});
-
-
 //require file structure package
 var fs = require("fs");
 
@@ -139,12 +132,19 @@ function userInput() {
 
         console.log("Movie Info:");
 
-        searchTerm = searchTerm.split("").join("+");
+        searchTerm = searchTerm.split(" ").join("+");
 
-        request.get('http://www.omdbapi.com/?t=' + searchTerm)
-            .on('error', function(err) {
-                console.log(err)
-            })
+        request("http://www.omdbapi.com/?t=" + searchTerm + "&y=&plot=short&apikey=40e9cece", function(error, response, body) {
+
+            console.log(JSON.parse(body).Title);
+            console.log("Year: " + JSON.parse(body).Year);
+            console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
+            console.log("Rotten Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value);
+            console.log("Country Produced: " + JSON.parse(body).Country);
+            console.log("Language: " + JSON.parse(body).Language);
+            console.log("Movie Plot: " + JSON.parse(body).Plot);
+            console.log("Actors: " + JSON.parse(body).Actors);
+        });
     }
 
     else if (command === "do-what-it-says") {
